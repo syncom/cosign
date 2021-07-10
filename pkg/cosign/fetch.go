@@ -16,6 +16,7 @@
 package cosign
 
 import (
+        "fmt"
 	"context"
 	"crypto/x509"
 	"encoding/json"
@@ -61,6 +62,9 @@ func AttachedImageTag(repo name.Repository, imgDesc *remote.Descriptor, suffix s
 }
 
 func GetAttachedManifestForImage(imgDesc *remote.Descriptor, repo name.Repository, suffix string, opts ...remote.Option) (*remote.Descriptor, error) {
+        fmt.Print("GetAttachedManifestForImage: repo: ", repo, "\n")
+        fmt.Print("GetAttachedManifestForImage: imgDesc: ", imgDesc, "\n")
+        fmt.Print("GetAttachedManifestForImage: suffix: ", suffix, "\n")
 	return remote.Get(AttachedImageTag(repo, imgDesc, suffix), opts...)
 }
 
@@ -78,6 +82,8 @@ func FetchSignaturesForDescriptor(ctx context.Context, signedDescriptor *remote.
 		return nil, errors.Wrap(err, "getting signature manifest")
 	}
 	sigImg, err := sigImgDesc.Image()
+        fmt.Print("FetchSignaturesForDescriptor: sigImg: ", sigImg, "\n")
+        fmt.Print("FetchSignaturesForDescriptor: sigImgDesc: ", sigImgDesc, "\n")
 	if err != nil {
 		return nil, errors.Wrap(err, "remote image")
 	}

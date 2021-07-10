@@ -197,6 +197,10 @@ func Verify(ctx context.Context, signedImgRef name.Reference, co *CheckOpts) ([]
 	if (sigRepo == name.Repository{}) {
 		sigRepo = signedImgRef.Context()
 	}
+
+        // Debugging
+        fmt.Print("Verify: sigRepo", sigRepo, "\n")
+
 	allSignatures, err := FetchSignaturesForDescriptor(ctx, signedImgDesc, sigRepo, co.RegistryClientOpts...)
 	if err != nil {
 		return nil, errors.Wrap(err, "fetching signatures")

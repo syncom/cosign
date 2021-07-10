@@ -146,6 +146,7 @@ func (c *VerifyCommand) Exec(ctx context.Context, args []string) (err error) {
 			return err
 		}
 		sigRepo, err := TargetRepositoryForImage(ref)
+                fmt.Print("sigRepo: ", sigRepo, "\n")
 		if err != nil {
 			return err
 		}
