@@ -29,8 +29,8 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/peterbourgon/ff/v3/ffcli"
 
-	"github.com/sigstore/cosign/pkg/cosign"
-	cremote "github.com/sigstore/cosign/pkg/cosign/remote"
+	"github.com/syncom/cosign/pkg/cosign"
+	cremote "github.com/syncom/cosign/pkg/cosign/remote"
 	sigPayload "github.com/sigstore/sigstore/pkg/signature/payload"
 )
 

@@ -29,7 +29,7 @@ import (
 	"testing"
 
 	// Import the functions directly for testing.
-	. "github.com/sigstore/cosign/cmd/cosign/cli/pivcli"
+	. "github.com/syncom/cosign/cmd/cosign/cli/pivcli"
 )
 
 func TestSetManagementKeyCmd(t *testing.T) {

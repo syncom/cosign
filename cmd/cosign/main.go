@@ -25,8 +25,8 @@ import (
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
 
-	"github.com/sigstore/cosign/cmd/cosign/cli"
-	"github.com/sigstore/cosign/cmd/cosign/cli/pivcli"
+	"github.com/syncom/cosign/cmd/cosign/cli"
+	"github.com/syncom/cosign/cmd/cosign/cli/pivcli"
 )
 
 var (

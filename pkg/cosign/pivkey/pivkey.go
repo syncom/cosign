@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	"github.com/go-piv/piv-go/piv"
-	"github.com/sigstore/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign"
 	"github.com/sigstore/sigstore/pkg/signature"
 	"golang.org/x/term"
 )

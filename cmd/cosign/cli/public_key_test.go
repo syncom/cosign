@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sigstore/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign"
 )
 
 func pass(s string) cosign.PassFunc {

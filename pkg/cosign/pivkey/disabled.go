@@ -21,7 +21,7 @@ import (
 	"crypto"
 	"errors"
 
-	"github.com/sigstore/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign"
 	"github.com/sigstore/sigstore/pkg/signature"
 )
 

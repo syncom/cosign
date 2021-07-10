@@ -37,9 +37,9 @@ import (
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/open-policy-agent/opa/types"
 
-	"github.com/sigstore/cosign/cmd/cosign/cli"
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/cosign/fulcio"
+	"github.com/syncom/cosign/cmd/cosign/cli"
+	"github.com/syncom/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign/fulcio"
 )
 
 func main() {

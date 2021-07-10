@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/sigstore/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign"
 )
 
 func generateKeyFile(t *testing.T, tmpDir string, pf cosign.PassFunc) (privFile, pubFile string) {

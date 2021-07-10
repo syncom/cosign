@@ -38,11 +38,11 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/random"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 
-	"github.com/sigstore/cosign/cmd/cosign/cli"
-	sget "github.com/sigstore/cosign/cmd/sget/cli"
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/cosign/kubernetes"
-	cremote "github.com/sigstore/cosign/pkg/cosign/remote"
+	"github.com/syncom/cosign/cmd/cosign/cli"
+	sget "github.com/syncom/cosign/cmd/sget/cli"
+	"github.com/syncom/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign/kubernetes"
+	cremote "github.com/syncom/cosign/pkg/cosign/remote"
 	"github.com/sigstore/sigstore/pkg/signature/payload"
 
 	kubernetesclient "github.com/GoogleContainerTools/skaffold/pkg/skaffold/kubernetes/client"

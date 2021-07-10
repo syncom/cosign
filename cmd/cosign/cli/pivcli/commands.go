@@ -30,7 +30,7 @@ import (
 
 	"github.com/go-piv/piv-go/piv"
 	"github.com/manifoldco/promptui"
-	"github.com/sigstore/cosign/pkg/cosign/pivkey"
+	"github.com/syncom/cosign/pkg/cosign/pivkey"
 )
 
 func SetManagementKeyCmd(_ context.Context, oldKey, newKey string, randomKey bool) error {

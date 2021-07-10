@@ -24,7 +24,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/peterbourgon/ff/v3/ffcli"
-	"github.com/sigstore/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign"
 )
 
 func Clean() *ffcli.Command {

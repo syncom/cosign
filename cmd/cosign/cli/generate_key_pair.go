@@ -26,8 +26,8 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/term"
 
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/cosign/kubernetes"
+	"github.com/syncom/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign/kubernetes"
 	"github.com/sigstore/sigstore/pkg/kms"
 )
 

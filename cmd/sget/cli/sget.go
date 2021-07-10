@@ -23,9 +23,9 @@ import (
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
-	"github.com/sigstore/cosign/cmd/cosign/cli"
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/cosign/fulcio"
+	"github.com/syncom/cosign/cmd/cosign/cli"
+	"github.com/syncom/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign/fulcio"
 )
 
 func SgetCmd(ctx context.Context, imageRef, keyRef string) (io.ReadCloser, error) {

@@ -25,7 +25,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/peterbourgon/ff/v3/ffcli"
-	cremote "github.com/sigstore/cosign/pkg/cosign/remote"
+	cremote "github.com/syncom/cosign/pkg/cosign/remote"
 )
 
 func fileFromFlag(s string) cremote.File {

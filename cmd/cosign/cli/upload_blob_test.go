@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	cremote "github.com/sigstore/cosign/pkg/cosign/remote"
+	cremote "github.com/syncom/cosign/pkg/cosign/remote"
 )
 
 func Test_fileFromFlag(t *testing.T) {

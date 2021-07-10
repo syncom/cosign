@@ -22,13 +22,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
+	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/peterbourgon/ff/v3/ffcli"
 	"github.com/pkg/errors"
 
-	"github.com/sigstore/cosign/pkg/cosign"
-	"github.com/sigstore/cosign/pkg/cosign/fulcio"
-	"github.com/sigstore/cosign/pkg/cosign/pivkey"
+	"github.com/syncom/cosign/pkg/cosign"
+	"github.com/syncom/cosign/pkg/cosign/fulcio"
+	"github.com/syncom/cosign/pkg/cosign/pivkey"
+	"github.com/sigstore/sigstore/pkg/signature"
 	"github.com/sigstore/sigstore/pkg/signature/payload"
 )
 
@@ -37,29 +40,33 @@ type VerifyCommand struct {
 	CheckClaims bool
 	KeyRef      string
 	Sk          bool
+	Slot        string
 	Output      string
 	Annotations *map[string]interface{}
 }
 
-// Verify builds and returns an ffcli command
-func Verify() *ffcli.Command {
-	cmd := VerifyCommand{}
-	flagset := flag.NewFlagSet("cosign verify", flag.ExitOnError)
+func applyVerifyFlags(cmd *VerifyCommand, flagset *flag.FlagSet) {
 	annotations := annotationsMap{}
-
-	flagset.StringVar(&cmd.KeyRef, "key", "", "path to the public key file, URL, or KMS URI")
+	flagset.StringVar(&cmd.KeyRef, "key", "", "path to the public key file, URL, KMS URI or Kubernetes Secret")
 	flagset.BoolVar(&cmd.Sk, "sk", false, "whether to use a hardware security key")
-
+	flagset.StringVar(&cmd.Slot, "slot", "", "security key slot to use for generated key (authentication|signature|card-authentication|key-management)")
 	flagset.BoolVar(&cmd.CheckClaims, "check-claims", true, "whether to check the claims found")
 	flagset.StringVar(&cmd.Output, "output", "json", "output the signing image information. Default JSON.")
 
 	// parse annotations
 	flagset.Var(&annotations, "a", "extra key=value pairs to sign")
 	cmd.Annotations = &annotations.annotations
+}
+
+// Verify builds and returns an ffcli command
+func Verify() *ffcli.Command {
+	cmd := VerifyCommand{}
+	flagset := flag.NewFlagSet("cosign verify", flag.ExitOnError)
+	applyVerifyFlags(&cmd, flagset)
 
 	return &ffcli.Command{
 		Name:       "verify",
-		ShortUsage: "cosign verify -key <key path>|<key url>|<kms uri> <image uri>",
+		ShortUsage: "cosign verify -key <key path>|<key url>|<kms uri> <image uri> [<image uri> ...]",
 		ShortHelp:  "Verify a signature on the supplied container image",
 		LongHelp: `Verify signature and annotations on an image by checking the claims
 against the transparency log.
@@ -67,6 +74,9 @@ against the transparency log.
 EXAMPLES
   # verify cosign claims and signing certificates on the image
   cosign verify <IMAGE>
+
+  # verify multiple images
+  cosign verify <IMAGE_1> <IMAGE_2> ...
 
   # additionally verify specified annotations
   cosign verify -a key1=val1 -a key2=val2 <IMAGE>
@@ -81,14 +91,18 @@ EXAMPLES
   cosign verify -key https://host.for/<FILE> <IMAGE>
 
   # verify image with public key stored in Google Cloud KMS
-  cosign verify -key gcpkms://projects/<PROJECT>/locations/global/keyRings/<KEYRING>/cryptoKeys/<KEY> <IMAGE>`,
+  cosign verify -key gcpkms://projects/<PROJECT>/locations/global/keyRings/<KEYRING>/cryptoKeys/<KEY> <IMAGE>
+  
+  # verify image with public key stored in Hashicorp Vault
+  cosign verify -key hashivault:///<KEY> <IMAGE>`,
+
 		FlagSet: flagset,
 		Exec:    cmd.Exec,
 	}
 }
 
 // Exec runs the verification command
-func (c *VerifyCommand) Exec(ctx context.Context, args []string) error {
+func (c *VerifyCommand) Exec(ctx context.Context, args []string) (err error) {
 	if len(args) == 0 {
 		return flag.ErrHelp
 	}
@@ -100,33 +114,47 @@ func (c *VerifyCommand) Exec(ctx context.Context, args []string) error {
 	co := &cosign.CheckOpts{
 		Annotations: *c.Annotations,
 		Claims:      c.CheckClaims,
-		Tlog:        EnableExperimental(),
-		Roots:       fulcio.Roots,
+		RootCerts:   fulcio.Roots,
+		RegistryClientOpts: []remote.Option{
+			remote.WithAuthFromKeychain(authn.DefaultKeychain),
+			remote.WithContext(ctx),
+		},
+	}
+	if EnableExperimental() {
+		co.RekorURL = TlogServer()
 	}
 	keyRef := c.KeyRef
 
 	// Keys are optional!
+	var pubKey signature.Verifier
 	if keyRef != "" {
-		pubKey, err := publicKeyFromKeyRef(ctx, keyRef)
+		pubKey, err = publicKeyFromKeyRef(ctx, keyRef)
 		if err != nil {
 			return errors.Wrap(err, "loading public key")
 		}
-		co.PubKey = pubKey
 	} else if c.Sk {
-		pubKey, err := pivkey.NewPublicKeyProvider()
+		pubKey, err = pivkey.NewPublicKeyProvider(c.Slot)
 		if err != nil {
-			return errors.Wrap(err, "loading public key")
+			return errors.Wrap(err, "initializing security key")
 		}
-		co.PubKey = pubKey
 	}
+	co.SigVerifier = pubKey
 
 	for _, imageRef := range args {
 		ref, err := name.ParseReference(imageRef)
 		if err != nil {
 			return err
 		}
+		sigRepo, err := TargetRepositoryForImage(ref)
+                fmt.Print("sigRepo: ", sigRepo, "\n")
+		if err != nil {
+			return err
+		}
+		co.SignatureRepo = sigRepo
+		//TODO: this is really confusing, it's actually a return value for the printed verification below
+		co.VerifyBundle = false
 
-		verified, err := cosign.Verify(ctx, ref, co, TlogServer())
+		verified, err := cosign.Verify(ctx, ref, co)
 		if err != nil {
 			return err
 		}
@@ -149,11 +177,11 @@ func PrintVerification(imgRef string, verified []cosign.SignedPayload, co *cosig
 	}
 	if co.VerifyBundle {
 		fmt.Fprintln(os.Stderr, "  - Existence of the claims in the transparency log was verified offline")
-	} else if co.Tlog {
+	} else if co.RekorURL != "" {
 		fmt.Fprintln(os.Stderr, "  - The claims were present in the transparency log")
 		fmt.Fprintln(os.Stderr, "  - The signatures were integrated into the transparency log when the certificate was valid")
 	}
-	if co.PubKey != nil {
+	if co.SigVerifier != nil {
 		fmt.Fprintln(os.Stderr, "  - The signatures were verified against the specified public key")
 	}
 	fmt.Fprintln(os.Stderr, "  - Any certificates were verified against the Fulcio roots.")
